@@ -41,8 +41,8 @@ class Piece:
         return 'hello' + self.color
 
     def collision(self, x, y):
-        x_range = range(int(self.x), int(self.x) + 20)
-        y_range = range(int(self.y), int(self.y) + 20)
+        x_range = range(int(self.x), int(self.x) + self.width)
+        y_range = range(int(self.y), int(self.y) + self.height)
         if x in x_range and y in y_range:
             return True
         else:
@@ -96,8 +96,6 @@ def readin_data(data):
             piece.color = game[i]
             piece.x = 0  # Set default x value
             piece.y = 0  # Set default y value
-            piece.width = 20    # Set defualt square width
-            piece.height = 20   # Set default squre height
             pieces.append(piece)
         gametemp.pieces = pieces
         game_objs.append(gametemp)
@@ -157,10 +155,10 @@ class View_Setup():
                                              w + 40,
                                              w + 40))
                 pygame.draw.rect(self.screen, pygame.Color('Black'),
-                                 pygame.Rect(game.pieces[0].x-10,
-                                             game.pieces[0].y-10,
-                                             w+20,
-                                             w+20))
+                                 pygame.Rect(game.pieces[0].x-15,
+                                             game.pieces[0].y-15,
+                                             w+30,
+                                             w+30))
             for piece in game.pieces:
                 pygame.draw.rect(self.screen, pygame.Color(piece.color),
                                  pygame.Rect(piece.x, piece.y,
