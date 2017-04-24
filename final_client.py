@@ -10,12 +10,14 @@ import pygame
 import time
 from com_client import client
 import ast
+import pygame_textinput # Import the textinput-module
 
+clock = pygame.time.Clock()
 WIDTH = 800
 BOX_WIDTH = 20
 GAP_WIDTH = 20
 gap = 30
-
+COLOR = None
 
 class Board():
     def __init__(self, pieces, focus, height=300, width=300, color='Grey'):
@@ -137,32 +139,40 @@ class View_Setup():
         self.screen = screen
 
     def draw(self):
-        self.screen.fill(pygame.Color(25, 25, 25))
-        # Draw vertical division lines
-        pygame.draw.line(self.screen, pygame.Color(125, 125, 125), (WIDTH / 3, 0), (WIDTH / 3, WIDTH), 5)
-        pygame.draw.line(self.screen, pygame.Color(125, 125, 125), (2*WIDTH/3, 0), (2*WIDTH/3, WIDTH), 5)
+        blue_o = pygame.image.load("assets/blue_o.png")
+        blue_x = pygame.image.load("assets/blue_x.png")
+        red_o = pygame.image.load("assets/red_o.png")
+        red_x = pygame.image.load("assets/red_x.png")
+        background = pygame.image.load("assets/Background.png24")
 
-        # Draw horizontal division lines
-        pygame.draw.line(self.screen, pygame.Color(125, 125, 125), (0, WIDTH/3), (WIDTH, WIDTH/3), 5)
-        pygame.draw.line(self.screen, pygame.Color(125, 125, 125), (0, 2*WIDTH/3), (WIDTH, 2*WIDTH/3), 5)
+        blue_o = pygame.transform.scale(blue_o, (40, 40))
+        blue_x = pygame.transform.scale(blue_x, (40, 40))
+        red_o = pygame.transform.scale(red_o, (40, 40))
+        red_x = pygame.transform.scale(red_x, (40, 40))
+        background = pygame.transform.scale(background, (815, 815))
+
+        self.screen.fill(pygame.Color(25, 25, 25))
+        self.screen.blit(background, (-15, -15))
 
         for game in self.model:
             if game.focus:
                 w = game.pieces[8].x + 20 - game.pieces[0].x
-                pygame.draw.rect(self.screen, pygame.Color('Gray'),
+                pygame.draw.rect(self.screen, pygame.Color(COLOR),
                                  pygame.Rect(game.pieces[0].x - 20,
                                              game.pieces[0].y - 20,
                                              w + 40,
-                                             w + 40))
-                pygame.draw.rect(self.screen, pygame.Color('Black'),
-                                 pygame.Rect(game.pieces[0].x-15,
-                                             game.pieces[0].y-15,
-                                             w+30,
-                                             w+30))
+                                             w + 40), 5)
+
             for piece in game.pieces:
-                pygame.draw.rect(self.screen, pygame.Color(piece.color),
-                                 pygame.Rect(piece.x, piece.y,
-                                             piece.width, piece.height))
+                piece_to_use = None
+                if piece.color == 'steelblue':
+                    piece_to_use = None
+                elif piece.color == 'blue':
+                    piece_to_use = blue_o
+                elif piece.color == 'red':
+                    piece_to_use = red_x
+                if piece_to_use is not None:
+                    self.screen.blit(piece_to_use, (piece.x, piece.y))
         pygame.display.update()
 
 
@@ -174,7 +184,7 @@ def to_array(thruput):
         ls = ast.literal_eval(thruput)
         return ls
     except (SyntaxError, ValueError) as e:
-        print(e)
+        print('Player Two Has Not Yet Connected')
         return False
         # print(thruput)
 
@@ -195,11 +205,56 @@ def paint_boxes(ls, screen):
     pygame.display.update()
 
 
+def starting_screen(screen):
+    run = True
+    textinput = pygame_textinput.TextInput()
+    while run:
+        events = pygame.event.get()
+        for event in events:
+            if event.type == pygame.QUIT:
+                exit()
+
+        # Feed it with events every frame
+        if textinput.update(events):
+            if textinput.get_text().lower() == 'red' or textinput.get_text().lower() == 'blue':
+                run = False
+                return textinput.get_text()
+
+        background = pygame.image.load("assets/Background.png24")
+        title_super = pygame.image.load("assets/SUPER.JPG")
+        title_TicTac = pygame.image.load("assets/TicTac.JPG")
+
+        background = pygame.transform.scale(background, (815, 815))
+        title_super = pygame.transform.scale(title_super, (200, 70))
+        # title_super = pygame.transform.rotate(title_super, -10)
+        title_TicTac = pygame.transform.scale(title_TicTac, (600, 85))
+        # title_TicTac = pygame.transform.rotate(title_TicTac, 30)
+
+        myfont = pygame.font.SysFont("monospace", 28)
+
+        # render text
+        label = myfont.render("Red or Blue?", 1, (0, 0, 0))
+
+        screen.blit(background, (-15, -15))
+        screen.blit(title_TicTac, (60, 100))
+        screen.blit(title_super, (30, 40))
+        pygame.draw.rect(screen, pygame.Color(200, 200, 200), (290, 350, 220, 90))
+        pygame.draw.rect(screen, pygame.Color(255, 255, 255), (300, 400, 200, 30))
+        screen.blit(textinput.get_surface(), (300, 400))
+        screen.blit(label, (300, 360))
+
+        pygame.display.update()
+        clock.tick(30)
+
+
 if __name__ == '__main__':
     pygame.init()
 
+    pygame.display.set_caption('Super Tic Tac Toe')
+
     size = (WIDTH, WIDTH)
     screen = pygame.display.set_mode(size)
+    user_color = starting_screen(screen).lower()
 
     # initializes and connects client object to server
     c = client()
