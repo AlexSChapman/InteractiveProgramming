@@ -157,11 +157,7 @@ class View_Setup():
         for game in self.model:
             if game.focus:
                 w = game.pieces[8].x + 20 - game.pieces[0].x
-                pygame.draw.rect(self.screen, pygame.Color(COLOR),
-                                 pygame.Rect(game.pieces[0].x - 20,
-                                             game.pieces[0].y - 20,
-                                             w + 40,
-                                             w + 40), 5)
+                pygame.draw.rect(self.screen, pygame.Color(COLOR), pygame.Rect(game.pieces[0].x - 20, game.pieces[0].y - 20,  w + 40, w + 40), 5)
 
             for piece in game.pieces:
                 piece_to_use = None
@@ -255,7 +251,7 @@ if __name__ == '__main__':
     size = (WIDTH, WIDTH)
     screen = pygame.display.set_mode(size)
     user_color = starting_screen(screen).lower()
-
+    COLOR = user_color
     # initializes and connects client object to server
     c = client()
     c.check_messages()
@@ -266,7 +262,6 @@ if __name__ == '__main__':
 
     running = True
 
-    user_color = input('What color are you?')
     c.send_message('u' + user_color)
 
     while running:
